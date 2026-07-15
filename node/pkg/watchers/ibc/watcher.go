@@ -28,8 +28,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/tidwall/gjson"
 
-	"nhooyr.io/websocket"
-	"nhooyr.io/websocket/wsjson"
+	"github.com/coder/websocket"
+	"github.com/coder/websocket/wsjson"
 
 	ethCommon "github.com/ethereum/go-ethereum/common"
 

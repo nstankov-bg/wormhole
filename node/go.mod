@@ -53,6 +53,7 @@ require (
 	github.com/btcsuite/btcd/btcec/v2 v2.3.4
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
+	github.com/coder/websocket v1.8.15
 	github.com/cosmos/cosmos-sdk v0.45.11
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gagliardetto/binary v0.7.7
@@ -69,7 +70,6 @@ require (
 	github.com/wormhole-foundation/wormhole/sdk v0.0.0-20220926172624-4b38dc650bb0
 	go.uber.org/goleak v1.3.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250707201910-8d1bb00bc6a7
-	nhooyr.io/websocket v1.8.7
 )
 
 require github.com/sercand/kuberesolver/v4 v4.0.0 // indirect
@@ -375,6 +375,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	lukechampine.com/blake3 v1.3.0 // indirect
+	nhooyr.io/websocket v1.8.7 // indirect
 )
 
 // Needed for cosmos-sdk based chains.  See

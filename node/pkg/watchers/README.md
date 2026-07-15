@@ -183,7 +183,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 
 ### Other thoughts / directions:
 
-1. Which websocket package to use? (gorilla or nhooyr). nhooyr was selected for the following reasons:
+1. Which websocket package to use? (gorilla or nhooyr). nhooyr (has been deprecated, but it is now actively maintained at coder/websocket) was selected for the following reasons:
    1. It has an active maintainer. Gorilla has been archived.
    2. It supports concurrent writes. Gorilla does not support concurrent writes
    3. It supports passing in a Context to read() for timing out the read.

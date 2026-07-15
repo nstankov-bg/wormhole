@@ -21,6 +21,7 @@ import (
 	"github.com/certusone/wormhole/node/pkg/readiness"
 	"github.com/certusone/wormhole/node/pkg/supervisor"
 	"github.com/certusone/wormhole/node/pkg/watchers"
+	"github.com/coder/websocket"
 	"github.com/gagliardetto/solana-go"
 	lookup "github.com/gagliardetto/solana-go/programs/address-lookup-table"
 	"github.com/gagliardetto/solana-go/rpc"
@@ -33,7 +34,6 @@ import (
 	"github.com/wormhole-foundation/wormhole/sdk/vaa"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"nhooyr.io/websocket"
 )
 
 type (
