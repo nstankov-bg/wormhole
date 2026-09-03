@@ -178,9 +178,8 @@ func (s *SolanaWatcher) shimProcessTopLevelInstruction(
 	alreadyProcessed ShimAlreadyProcessed,
 	isReobservation bool,
 ) (bool, error) {
-	topLevelIdx := uint16(topLevelIndex) // #nosec G115 -- The solana runtime max transaction size is 1232 bytes. So we'd never be able to have this many top level instructions.
-	// #nosec G115 -- The solana runtime max transaction size is 1232 bytes. So we'd never be able to have this many top level instructions.
-	if topLevelIdx >= uint16(len(tx.Message.Instructions)) {
+	topLevelIdx := uint16(topLevelIndex) // #nosec G115 -- The solana runtime can only support 64 top-level instructions per transaction max
+	if int(topLevelIdx) >= len(tx.Message.Instructions) {
 		return false, fmt.Errorf("topLevelIndex %d is greater than the total number of instructions in the tx message, %d", topLevelIdx, len(tx.Message.Instructions))
 	}
 	inst := tx.Message.Instructions[topLevelIdx]
@@ -228,7 +227,7 @@ func (s *SolanaWatcher) shimProcessInnerInstruction(
 	whProgramIndex uint16,
 	shimProgramIndex uint16,
 	tx *solana.Transaction,
-	innerInstructions []solana.CompiledInstruction,
+	innerInstructions []rpc.CompiledInstruction,
 	outerIdx int,
 	startIdx int,
 	alreadyProcessed ShimAlreadyProcessed,
@@ -268,7 +267,7 @@ func (s *SolanaWatcher) shimProcessRest(
 	whProgramIndex uint16,
 	shimProgramIndex uint16,
 	tx *solana.Transaction,
-	innerInstructions []solana.CompiledInstruction,
+	innerInstructions []rpc.CompiledInstruction,
 	outerIdx int,
 	startIdx int,
 	postMessage *ShimPostMessageData,

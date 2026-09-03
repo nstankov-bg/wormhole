@@ -664,7 +664,7 @@ func (s *SolanaWatcher) fetchBlock(ctx context.Context, logger *zap.Logger, slot
 	start := time.Now()
 	rewards := false
 
-	maxSupportedTransactionVersion := uint64(0)
+	maxSupportedTransactionVersion := uint64(1)
 	out, err := s.rpcClient.GetBlockWithOpts(rCtx, slot, &rpc.GetBlockOpts{
 		Encoding:                       solana.EncodingBase64, // solana-go doesn't support json encoding.
 		TransactionDetails:             "full",
@@ -872,7 +872,7 @@ func (s *SolanaWatcher) processTransaction(ctx context.Context, rpcClient *rpc.C
 				}
 			}
 		} else {
-			found, err := s.processInstruction(ctx, rpcClient, slot, inst, programIndex, tx, signature, i, isReobservation)
+			found, err := s.processInstruction(ctx, rpcClient, slot, toRPCCompiledInstruction(inst), programIndex, tx, signature, i, isReobservation)
 			if err != nil {
 				s.logger.Error("malformed Wormhole instruction",
 					zap.Error(err),
@@ -971,7 +971,23 @@ func (s *SolanaWatcher) processTransaction(ctx context.Context, rpcClient *rpc.C
 	return
 }
 
-func (s *SolanaWatcher) processInstruction(ctx context.Context, rpcClient *rpc.Client, slot uint64, inst solana.CompiledInstruction, programIndex uint16, tx *solana.Transaction, signature solana.Signature, idx int, isReobservation bool) (bool, error) {
+// toRPCCompiledInstruction converts a top-level solana.CompiledInstruction
+// (from tx.Message.Instructions) into an rpc.CompiledInstruction, the type
+// used for inner instructions (meta.InnerInstructions[i].Instructions), so
+// both can be passed through the same instruction-processing functions.
+func toRPCCompiledInstruction(inst solana.CompiledInstruction) rpc.CompiledInstruction {
+	return rpc.CompiledInstruction{
+		ProgramIDIndex: inst.ProgramIDIndex,
+		Accounts:       inst.Accounts,
+		Data:           inst.Data,
+		// StackHeight reflects RPC-reported CPI depth for inner instructions;
+		// fixed at 0 here since inst is always a top-level instruction.
+		// Trust StackHeight only on instructions sourced directly from the RPC.
+		StackHeight: 0,
+	}
+}
+
+func (s *SolanaWatcher) processInstruction(ctx context.Context, rpcClient *rpc.Client, slot uint64, inst rpc.CompiledInstruction, programIndex uint16, tx *solana.Transaction, signature solana.Signature, idx int, isReobservation bool) (bool, error) {
 	if inst.ProgramIDIndex != programIndex {
 		return false, nil
 	}
@@ -1189,9 +1205,13 @@ func (s *SolanaWatcher) processAccountSubscriptionData(_ context.Context, data [
 		return nil
 	}
 
-	acc := solana.PublicKeyFromBytes([]byte(value.Pubkey))
-	// NOTE: We don't care about the number of observations here so the return value is ignored.
-	// The called function will still publish observations if it is successful.
+	// value.Pubkey is base58-encoded, per the Solana JSON-RPC account notification format.
+	acc, err := solana.PublicKeyFromBase58(value.Pubkey)
+	if err != nil {
+		s.logger.Error("failed to parse account pubkey", zap.String("account", value.Pubkey), zap.Error(err))
+		p2p.DefaultRegistry.AddErrorCount(s.chainID, 1)
+		return nil
+	}
 	s.processMessageAccount(s.logger, messageAccountData, acc, isReobservation, solana.Signature{}, false)
 
 	return nil
